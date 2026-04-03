@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>手工工作室计时收费计算器</title>
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+      background: #f5f7fb;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h1 { font-size: 24px; }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0fdf4;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .price {
+      font-size: 32px;
+      font-weight: bold;
+      color: #059669;
+    }
+
+    .error {
+      margin-top: 15px;
+      color: red;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>计时收费计算器</h1>
+
+    <label>开始时间</label>
+    <input id="start" type="time">
+
+    <label>结束时间</label>
+    <input id="end" type="time">
+
+    <button id="calc">计算价格</button>
+
+    <div id="error" class="error"></div>
+
+    <div id="result" class="result">
+      <div class="price" id="price"></div>
+      <div id="detail"></div>
+    </div>
+  </div>
+
+  <script>
+    function parseTime(t) {
+      if (!t) return null;
+      let [h, m] = t.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    function formatDuration(mins) {
+      let h = Math.floor(mins / 60);
+      let m = mins % 60;
+      if (h && m) return h + "小时" + m + "分钟";
+      if (h) return h + "小时";
+      return m + "分钟";
+    }
+
+    function calculate() {
+      let start = parseTime(document.getElementById("start").value);
+      let end = parseTime(document.getElementById("end").value);
+
+      let error = document.getElementById("error");
+      let resultBox = document.getElementById("result");
+
+      error.style.display = "none";
+      resultBox.style.display = "none";
+
+      if (start === null || end === null) {
+        error.innerText = "请输入时间";
+        error.style.display = "block";
+        return;
+      }
+
+      let duration = end - start;
+      if (duration < 0) duration += 1440;
+
+      if (duration === 0) {
+        error.innerText = "时间不能相同";
+        error.style.display = "block";
+        return;
+      }
+
+      let price = 9;
+
+      if (duration > 60) {
+        let extra = duration - 60;
+        let fullHours = Math.floor(extra / 60);
+        let remain = extra % 60;
+
+        price += fullHours * 10;
+
+        if (remain <= 10) {
+          // free
+        } else if (remain <= 30) {
+          price += 5;
+        } else {
+          price += 10;
+        }
+      }
+
+      document.getElementById("price").innerText = "$" + price;
+      document.getElementById("detail").innerHTML =
+        "总时长：" + formatDuration(duration);
+
+      resultBox.style.display = "block";
+    }
+
+    document.getElementById("calc").addEventListener("click", calculate);
+  </script>
+</body>
+</html>
